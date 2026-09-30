@@ -1,5 +1,9 @@
 # headerlint
 
+[![Release](https://img.shields.io/github/v/release/unlinedoverwe/headerlint?display_name=tag)](https://github.com/unlinedoverwe/headerlint/releases)
+[![License](https://img.shields.io/github/license/unlinedoverwe/headerlint)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/unlinedoverwe/headerlint?style=flat)](https://github.com/unlinedoverwe/headerlint/stargazers)
+
 `headerlint` audits HTTP response security headers. It is a small, read-only
 review tool for defensive checks in development and CI. It does not exploit
 applications, enumerate networks, bypass access controls, or perform a
