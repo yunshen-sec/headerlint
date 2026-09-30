@@ -70,6 +70,15 @@ def _parse_raw(raw: bytes) -> HttpResponse:
         name, value = line.split(":", 1)
         if not name.strip():
             raise SampleError("header name cannot be empty")
-        headers[name.strip()] = value.strip()
+        normalized_name = name.strip()
+        normalized_value = value.strip()
+        existing_name = next(
+            (key for key in headers if key.lower() == normalized_name.lower()), None
+        )
+        if existing_name is not None:
+            # Repeated HTTP fields carry independent values. Keep them joined so
+            # the audit rules can apply a conservative check to all values.
+            headers[existing_name] = f"{headers[existing_name]}, {normalized_value}"
+        else:
+            headers[normalized_name] = normalized_value
     return HttpResponse(status, headers, "local-sample", body)
-

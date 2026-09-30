@@ -34,6 +34,20 @@ class _RawResponse:
     body: bytes
 
 
+def _headers_to_dict(headers) -> dict[str, str]:  # type: ignore[no-untyped-def]
+    """Preserve repeated, case-insensitive HTTP fields for conservative checks."""
+    result: dict[str, str] = {}
+    for key, value in headers.items():
+        name = str(key)
+        text = str(value)
+        existing = next((item for item in result if item.lower() == name.lower()), None)
+        if existing is None:
+            result[name] = text
+        else:
+            result[existing] = f"{result[existing]}, {text}"
+    return result
+
+
 def validate_public_url(url: str) -> None:
     """Reject URLs that can reach local, private, or otherwise non-public hosts."""
 
@@ -118,7 +132,7 @@ def _open_once(opener, url: str, timeout: float) -> _RawResponse:  # type: ignor
         try:
             body = _read_limited(response, MAX_RESPONSE_BYTES)
             status = int(getattr(response, "status", None) or response.getcode() or 0)
-            headers = {str(key): str(value) for key, value in response.headers.items()}
+            headers = _headers_to_dict(response.headers)
             return _RawResponse(status, headers, body)
         except FetchError:
             raise
@@ -135,6 +149,8 @@ def fetch_url(url: str, timeout: float = 5.0, max_redirects: int = MAX_REDIRECTS
 
     if not 0.1 <= timeout <= MAX_TIMEOUT_SECONDS:
         raise FetchError(f"timeout must be between 0.1 and {MAX_TIMEOUT_SECONDS:g} seconds")
+    if not 0 <= max_redirects <= MAX_REDIRECTS:
+        raise FetchError(f"max_redirects must be between 0 and {MAX_REDIRECTS}")
     current = url
     # Do not inherit HTTP(S)_PROXY from the environment: proxy routing could
     # bypass the host validation above and send requests to an internal proxy.

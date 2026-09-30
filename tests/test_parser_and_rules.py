@@ -16,6 +16,17 @@ def test_parse_raw_response(tmp_path: Path):
     assert response.body == b"hello"
 
 
+def test_repeated_headers_are_checked_conservatively(tmp_path: Path):
+    path = tmp_path / "repeated.txt"
+    path.write_text(
+        "HTTP/1.1 200 OK\nX-Content-Type-Options: nosniff\nx-content-type-options: nosniff, nosniff\n\n",
+        encoding="ascii",
+    )
+    response = parse_sample(path)
+    assert response.headers["X-Content-Type-Options"] == "nosniff, nosniff, nosniff"
+    assert all(item.rule_id != "HL005" for item in audit_response(response))
+
+
 def test_parse_json_response(tmp_path: Path):
     path = tmp_path / "response.json"
     path.write_text('{"status": 204, "headers": {"X-Test": "yes"}}', encoding="utf-8")
@@ -51,4 +62,3 @@ def test_complete_response_passes():
         "https://example.test/",
     )
     assert audit_response(response) == []
-

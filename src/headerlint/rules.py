@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+import re
 
 from .models import Finding, HttpResponse
 
@@ -29,7 +30,7 @@ def audit_response(response: HttpResponse) -> list[Finding]:
     headers = {key.lower(): value.strip() for key, value in response.headers.items()}
     findings: list[Finding] = []
 
-    if response.url.startswith("https://") and "strict-transport-security" not in headers:
+    if response.url.lower().startswith("https://") and "strict-transport-security" not in headers:
         findings.append(
             _finding(
                 "HL001",
@@ -42,7 +43,8 @@ def audit_response(response: HttpResponse) -> list[Finding]:
         )
     elif "strict-transport-security" in headers:
         value = headers["strict-transport-security"]
-        if "max-age=" not in value.lower():
+        max_age_match = re.search(r"(?:^|;)\s*max-age\s*=\s*(\d+)", value, re.IGNORECASE)
+        if max_age_match is None or int(max_age_match.group(1)) <= 0:
             findings.append(
                 _finding(
                     "HL002",
@@ -78,7 +80,8 @@ def audit_response(response: HttpResponse) -> list[Finding]:
             )
         )
 
-    if headers.get("x-content-type-options", "").lower() != "nosniff":
+    xcto_values = [item.strip().lower() for item in headers.get("x-content-type-options", "").split(",")]
+    if not xcto_values or any(item != "nosniff" for item in xcto_values):
         findings.append(
             _finding(
                 "HL005",
@@ -90,8 +93,8 @@ def audit_response(response: HttpResponse) -> list[Finding]:
             )
         )
 
-    has_frame_protection = "x-frame-options" in headers or (
-        csp is not None and "frame-ancestors" in csp.lower()
+    has_frame_protection = bool(headers.get("x-frame-options", "").strip()) or (
+        csp is not None and re.search(r"(?:^|\s)frame-ancestors(?:\s|;|$)", csp, re.IGNORECASE) is not None
     )
     if not has_frame_protection:
         findings.append(
@@ -117,7 +120,7 @@ def audit_response(response: HttpResponse) -> list[Finding]:
                 "Referrer-Policy",
             )
         )
-    elif referrer.lower().strip() == "unsafe-url":
+    elif any(item.strip().lower() == "unsafe-url" for item in referrer.split(",")):
         findings.append(
             _finding(
                 "HL008",
@@ -129,7 +132,7 @@ def audit_response(response: HttpResponse) -> list[Finding]:
             )
         )
 
-    if "permissions-policy" not in headers:
+    if not headers.get("permissions-policy", "").strip():
         findings.append(
             _finding(
                 "HL009",
@@ -146,4 +149,3 @@ def audit_response(response: HttpResponse) -> list[Finding]:
 
 def rule_ids(findings: Iterable[Finding]) -> set[str]:
     return {finding.rule_id for finding in findings}
-

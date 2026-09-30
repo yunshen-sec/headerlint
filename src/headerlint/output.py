@@ -12,7 +12,7 @@ def render_table(report: AuditReport) -> str:
     lines = [f"Source: {report.source}", f"HTTP status: {report.status}", ""]
     if not report.findings:
         lines.append("PASS  No security-header findings.")
-        return "\n".join(lines)
+        return "\n".join(lines) + "\n"
     lines.append("SEVERITY  RULE   HEADER                         MESSAGE")
     lines.append("--------- ------ ------------------------------ ----------------------------------------")
     for finding in report.findings:
@@ -20,7 +20,7 @@ def render_table(report: AuditReport) -> str:
         message = finding.message.replace("\n", " ")
         lines.append(f"{finding.severity.upper():<9} {finding.rule_id:<6} {header:<30} {message}")
     lines.extend(["", f"Findings: {len(report.findings)}"])
-    return "\n".join(lines)
+    return "\n".join(lines) + "\n"
 
 
 def render_json(report: AuditReport) -> str:
@@ -72,4 +72,3 @@ def render(report: AuditReport, output_format: str) -> str:
     if output_format == "sarif":
         return render_sarif(report)
     return render_table(report)
-
