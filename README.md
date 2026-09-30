@@ -69,10 +69,9 @@ python -m pytest
 ```
 
 Tests use parser fixtures and mocked network responses. They never contact a
-real target. The repository includes a GitHub Actions workflow that runs the
-same test suite on supported Python versions.
+real target. Run the same test suite locally before opening a pull request.
+If you add CI in a fork, keep it limited to these local fixtures and tests.
 
 ## License
 
 MIT
-
