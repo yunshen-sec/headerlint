@@ -13,6 +13,24 @@ penetration test.
 baseline review) and security tool development. The project is a defensive aid,
 not a substitute for an authorized assessment.
 
+## At a glance
+
+| Concern | Behavior |
+| --- | --- |
+| Input | Local raw HTTP/JSON samples by default; an explicitly supplied public URL is optional |
+| Network | No network request for local samples; `--url` enables a bounded HTTPS/HTTP fetch |
+| Output | Human-readable table, JSON, or SARIF for review and CI ingestion |
+| Safety | Redirect, response-size, timeout, and destination checks are enforced |
+
+## Review workflow
+
+1. Capture a response from an authorized test fixture or approved endpoint.
+2. Run `headerlint` and preserve the JSON/SARIF report with the test evidence.
+3. Review each warning in the context of the endpoint, browser behavior, and
+   deployment architecture; not every missing header is a defect.
+4. Apply the smallest change, rerun the same fixture, and record the before /
+   after result in the change review.
+
 ## Authorized use
 
 Only inspect response samples you own or have permission to review. Network
