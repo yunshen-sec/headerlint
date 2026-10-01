@@ -9,6 +9,10 @@ review tool for defensive checks in development and CI. It does not exploit
 applications, enumerate networks, bypass access controls, or perform a
 penetration test.
 
+**Research track:** authorized penetration testing / red teaming (scoped HTTP
+baseline review) and security tool development. The project is a defensive aid,
+not a substitute for an authorized assessment.
+
 ## Authorized use
 
 Only inspect response samples you own or have permission to review. Network
