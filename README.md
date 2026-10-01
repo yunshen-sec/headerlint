@@ -2,7 +2,7 @@
 
 [![Release](https://img.shields.io/github/v/release/Secx1/headerlint?display_name=tag)](https://github.com/Secx1/headerlint/releases)
 [![License](https://img.shields.io/github/license/Secx1/headerlint)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/Secx1/headerlint?style=flat)](https://github.com/Secx1/headerlint/stargazers)
+[![Stars](https://img.shields.io/github/stars/Secx1/headerlint?style=flat)](https://github.com/Secx1/headerlint)
 
 `headerlint` audits HTTP response security headers. It is a small, read-only
 review tool for defensive checks in development and CI. It does not exploit
